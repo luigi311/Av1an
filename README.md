@@ -224,7 +224,20 @@ With your own parameters:
   On Ubuntu systems packages `python3-opencv` and `libsm6` are required
 
 ## Docker
-
+Docker can be ran with the following command if you are in the current directory
+```bash
+docker run -v $(pwd):/videos --user $(id -u):$(id -g) -it masterofzen/av1an -i S01E01.mkv {options}
+```
+Docker can also be built by using
+```bash
+docker build -t "av1an" .
+```
+To specify a different directory to use you would replace $(pwd) with the directory
+```bash
+docker run -v /c/Users/masterofzen/Videos:/videos --user $(id -u):$(id -g) -it masterofzen/av1an -i S01E01.mkv {options}
+```
+  
+The --user flag is require to avoid permission issues with the docker container not being able to write to the location, if you get permission issues ensure your user has access to the folder that you are using to encode.
 
 ### Support developer
 
