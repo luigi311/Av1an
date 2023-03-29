@@ -270,17 +270,29 @@ jobs:
           rm -rf /tmp/.buildx-cache
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
+  # Job to output if docker-publish should run or not based on if DOCKERHUB_USERNAME and DOCKERHUB_TOKEN are set
+  publish-check:
+    runs-on: ubuntu-latest
+    outputs:
+      should_publish: ${{ steps.publish_check.outputs.should_publish }}
+    steps:
+      - name: Check for DOCKERHUB_USERNAME and DOCKERHUB_TOKEN
+        id: publish_check
+        env: 
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: |
+          if [ -z "$DOCKERHUB_USERNAME" ] || [ -z "$DOCKERHUB_TOKEN" ]; then
+            echo "::set-output name=should_publish::false"
+          else
+            echo "::set-output name=should_publish::true"
+          fi
 
   docker-publish:
-    needs: [all-tests, docker]
+    needs: [all-tests, docker, publish-check]
     runs-on: ubuntu-latest
+    if: ${{ needs.publish-check.outputs.should_publish == 'true' }}
     steps:
-      - name: Check for secrets.DOCKERHUB_USERNAME
-        if: ${{ !secrets.DOCKERHUB_USERNAME }}
-        run: |
-          echo "secrets.DOCKERHUB_USERNAME is not set so we are not going to publish the docker image"
-          exit 0
-
       - name: Checkout
         uses: actions/checkout@v3
 
