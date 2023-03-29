@@ -274,9 +274,13 @@ jobs:
   docker-publish:
     needs: [all-tests, docker]
     runs-on: ubuntu-latest
-    # If release or push to master
-    if: github.event_name == 'release' || github.ref == 'refs/heads/master'
     steps:
+      - name: Check for secrets.DOCKERHUB_USERNAME
+        if: ${{ !secrets.DOCKERHUB_USERNAME }}
+        run: |
+          echo "secrets.DOCKERHUB_USERNAME is not set so we are not going to publish the docker image"
+          exit 0
+
       - name: Checkout
         uses: actions/checkout@v3
 
