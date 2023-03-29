@@ -274,23 +274,21 @@ jobs:
   docker-publish:
     needs: [all-tests, docker]
     runs-on: ubuntu-latest
-    env:
-      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-    if: "${{ github.event_name == 'push' && github.ref == 'refs/heads/master' && env.DOCKERHUB_USERNAME != '' && env.DOCKERHUB_TOKEN != '' }}"
+    # If release or push to master
+    if: github.event_name == 'release' || github.ref == 'refs/heads/master'
     steps:
       - name: Checkout
         uses: actions/checkout@v3
 
       - name: Docker meta
         id: docker_meta
+
         uses: docker/metadata-action@v4
         with:
-          images: ${{ secrets.DOCKER_USERNAME }}/av1an
+          images: ${{ secrets.DOCKERHUB_USERNAME }}/av1an
           tags: |
             type=raw,value=latest,enable=${{ github.event_name == 'release' }}
             type=ref,event=branch
-            type=ref,event=pr
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=sha
