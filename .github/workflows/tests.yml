@@ -273,6 +273,8 @@ jobs:
   # Job to output if docker-publish should run or not based on if DOCKERHUB_USERNAME and DOCKERHUB_TOKEN are set
   publish-check:
     runs-on: ubuntu-latest
+    outputs:
+      should_publish: ${{ steps.publish_check.outputs.should_publish }}
     steps:
       - name: Check for DOCKERHUB_USERNAME and DOCKERHUB_TOKEN
         id: publish_check
@@ -282,7 +284,6 @@ jobs:
           else
             echo "should_publish=true" >> $GITHUB_OUTPUT
           fi
-          echo "$GITHUB_OUTPUT"
 
   docker-publish:
     needs: [all-tests, docker, publish-check]
